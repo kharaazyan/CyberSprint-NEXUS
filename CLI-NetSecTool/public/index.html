@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - Secure Log Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ff00;
+            --primary-dark: #00cc00;
+            --secondary: #32cd32;
+            --background: #0a0a0a;
+            --surface: #1a1a1a;
+            --surface-light: #2a2a2a;
+            --error: #ff3333;
+            --warning: #ffaa00;
+            --success: #00ff00;
+            --text: #ffffff;
+            --text-secondary: #888888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        header {
+            background: var(--surface);
+            padding: 1rem;
+            border-bottom: 2px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: var(--primary);
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .sidebar {
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 4rem);
+            position: sticky;
+            top: 2rem;
+        }
+
+        .sidebar .panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--primary-dark);
+            background: var(--surface-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar .stats-grid {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 2rem;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.1);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--primary-dark);
+        }
+
+        .panel-title {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        input, button, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--background);
+            border: 1px solid var(--primary);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        button {
+            background: var(--primary);
+            color: var(--background);
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: transparent;
+            color: var(--primary);
+        }
+
+        button.secondary:hover {
+            background: var(--surface-light);
+        }
+
+        .logs-container {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--primary);
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .log-entry {
+            background: var(--background);
+            border-left: 3px solid var(--primary);
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 0 4px 4px 0;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .log-entry:hover {
+            transform: translateX(5px);
+            transition: transform 0.3s ease;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        .log-message {
+            color: var(--text);
+            word-break: break-word;
+        }
+
+        .status {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--surface);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: var(--surface-light);
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--primary-dark);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 255, 0, 0.1);
+        }
+
+        .stat-title {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-value {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .stat-percentage {
+            font-size: 0.9rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .stat-percentage.warning {
+            color: var(--warning);
+        }
+
+        .stat-progress {
+            height: 4px;
+            background: var(--surface);
+            border-radius: 2px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar.warning {
+            background: var(--warning);
+        }
+
+        .progress-bar.critical {
+            background: var(--error);
+        }
+
+        .stat-details {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .load-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .load-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .load-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            width: 2rem;
+        }
+
+        .load-value {
+            color: var(--text);
+            font-size: 0.8rem;
+            width: 3rem;
+            text-align: right;
+        }
+
+        .network-speeds {
+            display: flex;
+            gap: 1.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .network-speed {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .speed-label {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .speed-value {
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .network-speed:has(.speed-value:not(:contains('0 B/s'))) {
+            animation: pulse 2s infinite;
+        }
+
+        .keys-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .key-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: var(--surface);
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .key-item:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+        }
+
+        .key-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .key-name {
+            color: #00ff00;
+            text-transform: uppercase;
+        }
+
+        .key-value {
+            font-family: 'Share Tech Mono', monospace;
+            opacity: 0.9;
+        }
+
+        .copy-icon {
+            margin-right: 4px;
+        }
+
+        button.secondary.copied {
+            background: #00ff00;
+            color: #000;
+            border-color: #00ff00;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--surface);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            position: absolute;
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            margin-top: 70px;
+            text-align: center;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .config-section {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--primary-dark);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .config-section:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.1);
+        }
+
+        .config-section-header {
+            padding: 1.5rem;
+            background: var(--surface-light);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--primary-dark);
+            transition: background-color 0.3s ease;
+        }
+
+        .config-section-header:hover {
+            background: var(--surface);
+        }
+
+        .config-section-header .title-group {
+            flex: 1;
+        }
+
+        .config-section-header .panel-title {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .config-section-header .panel-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .config-section-header .collapse-icon {
+            color: var(--primary);
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+            margin-left: 1rem;
+            padding: 0.5rem;
+            border: 1px solid var(--primary-dark);
+            border-radius: 4px;
+            line-height: 1;
+            height: 40px;
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .config-section.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .config-section-content {
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            background: var(--surface-light);
+        }
+
+        .config-section.collapsed .config-section-content {
+            display: none;
+        }
+
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .config-table tr {
+            border-bottom: 1px solid rgba(0, 255, 0, 0.1);
+        }
+
+        .config-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .config-table th {
+            color: #00ff00;
+            text-align: left;
+            padding: 12px;
+            width: 200px;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: normal;
+        }
+
+        .config-table td.description {
+            color: #808080;
+            padding: 12px;
+            font-size: 14px;
+            width: 300px;
+        }
+
+        .config-table td.value {
+            padding: 12px;
+            width: auto;
+        }
+
+        .config-table input[type="text"],
+        .config-table input[type="number"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            color: #fff;
+            padding: 8px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .config-table input[type="text"]:focus,
+        .config-table input[type="number"]:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+        }
+
+        .config-array-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .config-array-item {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            background: var(--surface-light);
+            padding: 0.8rem;
+            border-radius: 4px;
+            border: 1px solid var(--primary-dark);
+            transition: all 0.2s ease;
+        }
+
+        .config-array-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .config-array-item input {
+            flex: 1;
+            margin: 0;
+        }
+
+        .config-array-item button {
+            width: auto;
+            padding: 0.8rem;
+            background: transparent;
+            border: 1px solid var(--primary-dark);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            min-width: 40px;
+        }
+
+        .config-array-item button:hover {
+            background: var(--surface);
+            border-color: var(--primary);
+        }
+
+        .config-nested {
+            margin: 0.5rem 0;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 4px;
+            border: 1px solid var(--primary-dark);
+        }
+
+        .config-nested:hover {
+            border-color: var(--primary);
+        }
+
+        .config-nested-label {
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .config-nested-label::before {
+            content: '⤷';
+            color: var(--primary-dark);
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--primary-dark);
+            padding-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--primary-dark);
+            border-radius: 4px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .tab:hover {
+            background: var(--surface-light);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: var(--background);
+            border-color: var(--primary);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .config-table input[type="number"] {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            appearance: none;
+        }
+
+        .config-table input[type="number"]::-webkit-outer-spin-button,
+        .config-table input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+
+        .config-table select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300ff00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 1.2rem;
+            padding-right: 2.5rem;
+        }
+
+        .config-table select:hover {
+            cursor: pointer;
+        }
+
+        /* Добавляем стили для кнопки добавления элемента массива */
+        .config-array-container > button {
+            align-self: flex-start;
+            margin-top: 0.5rem;
+            padding: 0.8rem 1.2rem;
+            background: transparent;
+            border: 1px dashed var(--primary-dark);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .config-array-container > button:hover {
+            background: var(--surface);
+            border-style: solid;
+        }
+
+        .config-array-container > button::before {
+            content: '+';
+            font-size: 1.2rem;
+        }
+
+        /* Добавляем стили для подсказок */
+        /* Стили для тултипов */
+        [title] {
+            position: relative;
+        }
+
+        [title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: normal;
+            max-width: 300px;
+            z-index: 1000;
+            border: 1px solid #00ff00;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, 10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        .error {
+            border-color: var(--error) !important;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 250px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                position: static;
+                margin-bottom: 2rem;
+            }
+        }
+
+        .log-viewer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 2px solid var(--primary);
+            z-index: 100;
+            transition: all 0.3s ease;
+            box-shadow: 0 -5px 15px rgba(0, 255, 0, 0.1);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-viewer.collapsed {
+            max-height: 40px;
+        }
+
+        .log-viewer-header {
+            padding: 0.5rem 1.2rem;
+            background: var(--surface-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .log-viewer-header:hover {
+            background: var(--surface);
+        }
+
+        .log-viewer-title {
+            color: var(--primary);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .log-count {
+            background: var(--primary);
+            color: var(--background);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            min-width: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .log-viewer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            background: var(--surface-light);
+            border-bottom: 1px solid var(--primary-dark);
+            gap: 1rem;
+        }
+
+        .log-filter {
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+        }
+
+        .log-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .log-filter-item:hover {
+            background: var(--surface);
+        }
+
+        .log-filter-item input[type="checkbox"] {
+            display: none;
+        }
+
+        .log-filter-item label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .log-filter-item .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--primary);
+            border-radius: 3px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .log-filter-item input[type="checkbox"]:checked + label .checkbox-custom {
+            background: var(--primary);
+        }
+
+        .log-filter-item input[type="checkbox"]:checked + label .checkbox-custom::after {
+            content: '✓';
+            color: var(--background);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .log-actions button {
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .log-actions button:hover {
+            transform: translateY(-2px);
+        }
+
+        .log-actions button svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .log-entry {
+            margin-bottom: 0.8rem;
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            background: var(--surface-light);
+            border-left: 4px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .log-entry:hover {
+            transform: translateX(5px);
+            background: var(--surface);
+        }
+
+        .log-entry.error {
+            border-left-color: var(--error);
+            background: rgba(255, 51, 51, 0.1);
+        }
+
+        .log-entry.warn {
+            border-left-color: var(--warning);
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .log-entry.info {
+            border-left-color: var(--primary);
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .log-entry-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .log-timestamp {
+            color: var(--text-secondary);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .log-level {
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .log-level.error {
+            background: var(--error);
+            color: var(--background);
+        }
+
+        .log-level.warn {
+            background: var(--warning);
+            color: var(--background);
+        }
+
+        .log-level.info {
+            background: var(--primary);
+            color: var(--background);
+        }
+
+        .log-source {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--surface);
+            border-radius: 3px;
+        }
+
+        .log-message {
+            color: var(--text);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .log-meta {
+            font-size: 0.85rem;
+            padding: 0.8rem;
+            background: var(--surface);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .log-search {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0 1rem;
+            background: var(--surface);
+            border-radius: 4px;
+            border: 1px solid var(--primary-dark);
+            transition: all 0.2s ease;
+        }
+
+        .log-search:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+        }
+
+        .log-search input {
+            background: none;
+            border: none;
+            padding: 0.6rem 0;
+            color: var(--text);
+            width: 200px;
+        }
+
+        .log-search input:focus {
+            outline: none;
+        }
+
+        .log-search svg {
+            width: 16px;
+            height: 16px;
+            color: var(--text-secondary);
+        }
+        .connection-type {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--surface);
+            border-radius: 3px;
+            margin-left: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .connection-quality {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--surface);
+            border-radius: 3px;
+            margin-left: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theoretical-max {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .connection-type {
+            border: 1px solid var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .network-interface:hover .theoretical-max {
+            color: var(--primary);
+            opacity: 1;
+        }
+
+        .ip-address {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .network-interface {
+            background: var(--surface-light);
+            padding: 0.8rem;
+            border-radius: 4px;
+            border: 1px solid var(--primary-dark);
+            transition: all 0.2s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .interface-header {
+            margin-bottom: 0.5rem;
+        }
+
+        .interface-name {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .connection-type {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.4rem;
+            background: var(--surface);
+            border: 1px solid var(--primary-dark);
+            border-radius: 3px;
+            color: var(--primary);
+        }
+
+        .ip-address {
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            margin: 0.3rem 0;
+        }
+
+        .network-speeds {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .speed-item {
+            background: var(--surface);
+            padding: 0.4rem 0.6rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--primary-dark);
+        }
+
+        .max-speed {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Добавляем кнопку для сброса максимумов */
+        .network-interface {
+            position: relative;
+        }
+
+        .reset-max {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.2rem 0.4rem;
+            font-size: 0.7rem;
+            background: var(--surface);
+            border: 1px solid var(--primary-dark);
+            border-radius: 3px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .network-interface:hover .reset-max {
+            opacity: 1;
+        }
+
+        .reset-max:hover {
+            background: var(--primary);
+            color: var(--background);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-bg" class="matrix-bg"></canvas>
+    <header>
+        <h1 class="logo">NEXUS SECURE LOG MANAGEMENT</h1>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="panel-header">
+                <span class="panel-title">System Stats</span>
+                <div style="display: flex; gap: 1rem;">
+                    <button id="refresh-stats-btn" class="secondary" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div id="system-stats" class="stats-grid">
+                <!-- Stats will be populated by JS -->
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="panel">
+                <div class="tab-container">
+                    <div class="tab active" data-tab="fetch">Fetch Logs</div>
+                    <div class="tab" data-tab="keys">IPNS Keys</div>
+                    <div class="tab" data-tab="config">Configuration</div>
+                </div>
+
+                <div class="tab-content active" data-tab="fetch">
+                    <div class="input-group">
+                        <label for="cid-input">CID</label>
+                        <input type="text" id="cid-input" placeholder="Enter CID..." autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <button id="fetch-btn">FETCH LOGS</button>
+                        <button id="resolve-btn" style="margin-top: 1rem;">RESOLVE IPNS</button>
+                    </div>
+                    <div class="logs-container" id="logs-output">
+                        <div class="loading-overlay" id="loading-overlay">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Processing...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" data-tab="keys">
+                    <div class="input-group">
+                        <label for="new-key-name">Generate New Key</label>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <input 
+                                type="text" 
+                                id="new-key-name" 
+                                placeholder="Enter key name..."
+                                style="
+                                    flex: 1;
+                                    height: 36px;
+                                    font-family: 'Share Tech Mono', monospace;
+                                    font-size: 14px;
+                                    padding: 0 12px;
+                                "
+                            >
+                            <button 
+                                id="generate-key-btn" 
+                                class="primary"
+                                style="
+                                    width: 150px;
+                                    height: 36px;
+                                    font-size: 14px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    gap: 8px;
+                                    padding: 0 16px;
+                                    white-space: nowrap;
+                                "
+                            >
+                                <span style="font-size: 16px;">🔑</span>
+                                Generate Key
+                            </button>
+                        </div>
+                    </div>
+                    <div id="keys-list" class="keys-list">
+                        <!-- Keys will be populated by JS -->
+                    </div>
+                </div>
+
+                <div class="tab-content" data-tab="config">
+                    <div class="panel-header">
+                        <span class="panel-title">System Configuration</span>
+                        <button id="save-config-btn" style="width: auto;">Save Changes</button>
+                    </div>
+                    <div id="config-editor">
+                        <!-- Config will be populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="status" id="status">
+        <div class="loading"></div>
+        <span id="status-text">Processing...</span>
+    </div>
+
+    <div class="log-viewer collapsed" id="log-viewer">
+        <div class="log-viewer-header" id="log-viewer-header">
+            <div class="log-viewer-title">
+                <span>System Logs</span>
+                <span class="log-count" id="log-count">(0)</span>
+            </div>
+            <span class="collapse-icon">▲</span>
+        </div>
+        <div class="log-controls">
+            <div class="log-filter">
+                <div class="log-filter-item">
+                    <input type="checkbox" id="show-errors" checked>
+                    <label for="show-errors">
+                        <span class="checkbox-custom"></span>
+                        Errors
+                    </label>
+                </div>
+                <div class="log-filter-item">
+                    <input type="checkbox" id="show-warnings" checked>
+                    <label for="show-warnings">
+                        <span class="checkbox-custom"></span>
+                        Warnings
+                    </label>
+                </div>
+                <div class="log-filter-item">
+                    <input type="checkbox" id="show-info" checked>
+                    <label for="show-info">
+                        <span class="checkbox-custom"></span>
+                        Info
+                    </label>
+                </div>
+            </div>
+            <div class="log-search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="log-search" placeholder="Search logs...">
+            </div>
+            <div class="log-actions">
+                <button class="secondary" id="clear-log-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Clear
+                </button>
+                <button class="secondary" id="export-log-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Export
+                </button>
+            </div>
+        </div>
+        <div class="log-viewer-content" id="log-viewer-content"></div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html> 

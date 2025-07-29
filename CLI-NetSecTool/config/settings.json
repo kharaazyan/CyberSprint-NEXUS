@@ -1,0 +1,178 @@
+{
+  "network": {
+    "default_host": "127.0.0.1",
+    "default_port": 5001,
+    "connection_timeout": 30000,
+    "max_retries": 3,
+    "keep_alive": true,
+    "proxy_enabled": false,
+    "proxy_url": "",
+    "ssl_enabled": false,
+    "ssl_cert_path": "",
+    "ssl_key_path": "",
+    "process_kill_timeout": 1000,
+    "cleanup_wait_timeout": 2000,
+    "daemon_shutdown_timeout": 5000,
+    "stats_update_interval": 500,
+    "ping_timeout": 1000,
+    "interface_speed_detection": {
+      "ethernet": {
+        "default": 100,
+        "gigabit": 1000
+      },
+      "wifi": {
+        "default": 300
+      },
+      "other": {
+        "default": 50
+      }
+    }
+  },
+  "server": {
+    "port": 4011,
+    "host": "localhost",
+    "static_dir": "public",
+    "api_prefix": "/api",
+    "cors": {
+      "enabled": false,
+      "origins": [
+        "*"
+      ],
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "rate_limit": {
+      "enabled": true,
+      "window_ms": 900000,
+      "max_requests": 3000
+    }
+  },
+  "ipfs": {
+    "api_url": "http://localhost:5001",
+    "timeout": 30000,
+    "max_retries": 2,
+    "allow_offline": false,
+    "allow_online": true,
+    "pin_enabled": false,
+    "pin_recursive": false,
+    "name_resolve_timeout": "30s",
+    "last_file_path": ".last_prev",
+    "pid_file": ".ipfs-daemon.pid",
+    "daemon_startup_timeout": 30000,
+    "custom_args": [
+      "--enable-pubsub-experiment",
+      "--enable-namesys-pubsub",
+      "--routing=dhtclient"
+    ],
+    "repo_dir": ".ipfs"
+  },
+  "encryption": {
+    "default_cipher": "aes-256-gcm",
+    "key_size": 256,
+    "iv_size": 12,
+    "tag_size": 16,
+    "private_key_file": "./keys/private_key.pem",
+    "ipns_key_file": "./keys/ipns_key.txt",
+    "key_derivation": "pbkdf2",
+    "pbkdf2_iterations": 100000,
+    "pbkdf2_digest": "sha512",
+    "enable_key_rotation": false,
+    "key_rotation_interval": 0,
+    "backup_enabled": true,
+    "backup_path": "./keys/backup/",
+    "oaep_hash": "sha1",
+    "padding_scheme": "pkcs1",
+    "encoding": "base64",
+    "key_format": "pem"
+  },
+  "logging": {
+    "log_file": "./logs/app.log",
+    "log_level": "info",
+    "max_log_size": 1048576,
+    "max_log_files": 5,
+    "enable_console": true,
+    "enable_file": true,
+    "format": "json",
+    "timestamp_format": "ISO",
+    "include_source": true,
+    "source_location": true,
+    "log_dir": "./logs",
+    "output_file": "logs_output.jsonl",
+    "indent": 4,
+    "sort_field": "event_id",
+    "sort_order": "desc",
+    "error_handling": {
+      "include_stack_trace": true,
+      "redact_sensitive_data": true,
+      "sensitive_fields": [
+        "password",
+        "token",
+        "key",
+        "secret"
+      ]
+    },
+    "log_rotation": {
+      "enabled": true,
+      "interval": "1d",
+      "max_files": 30,
+      "compress": true,
+      "max_size": "10m",
+      "pattern": "YYYY-MM-DD"
+    },
+    "categories": {
+      "security": "warn",
+      "network": "info",
+      "ipfs": "info",
+      "api": "info",
+      "encryption": "info",
+      "daemon": "info",
+      "web": "info"
+    },
+    "console_format": "colorized",
+    "file_format": "json",
+    "stats_file": "network_stats.json",
+    "default_meta": {
+      "app_name": "nexus-cli",
+      "app_version": "2.0.0",
+      "environment": "production"
+    }
+  },
+  "security": {
+    "rate_limiting": {
+      "enabled": true,
+      "window_ms": 900000,
+      "max_requests": 3000
+    },
+    "cors": {
+      "enabled": false,
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "api_keys": {
+      "enabled": false
+    },
+    "ip_whitelist": {
+      "enabled": false
+    }
+  },
+  "performance": {
+    "cache": {
+      "enabled": true,
+      "max_size": 100,
+      "ttl": 3600
+    },
+    "compression": {
+      "enabled": true,
+      "level": 6
+    },
+    "batch_processing": {
+      "enabled": true,
+      "size": 50,
+      "timeout": 1000
+    }
+  }
+}
