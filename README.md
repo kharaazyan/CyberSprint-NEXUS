@@ -605,9 +605,7 @@ make rebuild
 
 ---
 
-## 🏆 Tumo Labs CyberSprint — Why We Will Win
-
-Below are **five concrete reasons** Nexus is positioned to take first place in the Tumo Labs CyberSprint.
+## 🏆 Tumo Labs CyberSprint — 5 Real Reasons We Will Dominate CyberSprint 2025
 
 | # | Advantage | Agent & Reader Focus | Impact |
 |---|-----------|----------------------|--------|
