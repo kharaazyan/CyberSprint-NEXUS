@@ -14,7 +14,7 @@
 
 ---
 
-[🚀 Quick Start](#quick-start) • [📊 Features](#features) • [🏗️ Architecture](#architecture) • [📈 Performance](#performance) • [🔧 Installation](#installation) • [🏆 CyberSprint](#tumo-labs-cybersprint-5-real-reasons-we-will-dominate-cybersprint-2025)
+[🚀 Quick Start](#-quick-start) • [📊 Features](#-features) • [🏗️ Architecture](#️-architecture) • [📈 Performance](#-performance) • [🔧 Installation](#-installation) • [🏆 CyberSprint](#tumo-labs-cybersprint-5-real-reasons-we-will-dominate-cybersprint-2025)
 
 
 
