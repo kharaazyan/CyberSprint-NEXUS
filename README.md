@@ -14,7 +14,8 @@
 
 ---
 
-[🚀 Quick Start](#-quick-start) • [📊 Features](#-features) • [🏗️ Architecture](#️-architecture) • [📈 Performance](#-performance) • [🔧 Installation](#-installation) • [🏆 CyberSprint](#-tumo-labs-cybersprint---why-we-will-win)
+[🚀 Quick Start](#-quick-start) • [📊 Features](#-features) • [🏗️ Architecture](#️-architecture) • [📈 Performance](#-performance) • [🔧 Installation](#-installation) • [🏆 CyberSprint](#tumo-labs-сybersprint-—-5-real-reasons-we-will-dominate) 
+
 
 </div>
 
@@ -54,29 +55,27 @@
 Get Nexus running in under 5 minutes with our streamlined setup process.
 
 ```bash
-# 🎯 Clone the revolutionary security platform
-git clone https://github.com/kharaazyan/nexus.git
-cd nexus
+# 1️⃣ Clone the repository
+$ git clone https://github.com/kharaazyan/CyberSprint-NEXUS.git
+$ cd nexus
 
-# 🔍 Setup RT-SysAgent - Your real-time security guardian
-cd RT-SysAgent
-make all      # Builds agent, reader, and config_generator
+# 2️⃣ Build & configure the real‑time agent (root of RT‑SysAgent)
+$ cd RT-SysAgent
+$ ./setup.sh          # one‑shot build + dependency fetch
 
-# 🌐 Initialize IPFS and create cryptographic identity
-ipfs init
-ipfs key gen log-agent --type=rsa --size=2048
-ipfs daemon --routing=dhtclient &
+# 3️⃣ Start IPFS and create an identity
+$ ipfs init
+$ ipfs key gen log-agent --type rsa --size 2048
+$ ipfs daemon --routing dhtclient &
 
-# 🚀 Launch your security monitoring system
-sudo ./bin/agent &   # Real-time threat detection agent
-./bin/reader &       # Log processing and IPFS upload
+# 4️⃣ Launch the monitoring components
+$ sudo ./bin/agent &   # kernel‑level event collector
+$ ./bin/reader &        # encrypts batches & publishes to IPFS
 
-# 🛡️ Setup CLI-NetSecTool - Your forensic analysis powerhouse
-cd ../CLI-NetSecTool
-npm install          # Install Node.js dependencies
-
-# 🔍 Access your security intelligence
-node cli.js shell    # Interactive security analysis tool
+# 5️⃣ Fire up the forensic CLI & Web UI
+$ cd ../CLI-NetSecTool
+$ npm install           # install JS deps
+$ npm start             # launches interactive shell + web UI
 ```
 
 **⚡ In just 5 minutes, you'll have a production-ready cybersecurity platform monitoring your system in real-time!**
